@@ -1,4 +1,6 @@
 import { execFile } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { promisify } from "node:util";
 import type { Sandbox } from "./sandbox.ts";
 import { ToolError } from "./errors.ts";
@@ -16,6 +18,15 @@ export interface GitIdentity {
  * Hooks are disabled so a planted .git/hooks script can never run.
  */
 async function git(root: string, args: string[]): Promise<string> {
+  // The workspace must be its OWN repository. Without this check, a workspace folder that sits
+  // inside another repo (your project repo) would silently make git act on that parent repo.
+  if (!fs.existsSync(path.join(root, ".git"))) {
+    throw new ToolError("The workspace is not its own git repository yet. Run `npm run init:workspace` on the server.");
+  }
+  return gitRaw(root, args);
+}
+
+async function gitRaw(root: string, args: string[]): Promise<string> {
   const safety = ["-c", "core.hooksPath=/dev/null", "-c", "core.quotepath=false", "-c", "color.ui=false"];
   try {
     const { stdout } = await run("git", [...safety, ...args], {
@@ -36,16 +47,17 @@ async function git(root: string, args: string[]): Promise<string> {
   }
 }
 
+/**
+ * Make sure `root` has its own .git folder. We check for the folder itself, NOT
+ * "is this inside a repo" (rev-parse), because a workspace nested in a bigger repo
+ * would pass that test and every git command would then hit the parent repo.
+ */
 export async function ensureRepo(root: string, ident: GitIdentity): Promise<boolean> {
-  try {
-    await git(root, ["rev-parse", "--is-inside-work-tree"]);
-    return false;
-  } catch {
-    await git(root, ["init", "-b", "main"]);
-    await git(root, ["config", "user.name", ident.name]);
-    await git(root, ["config", "user.email", ident.email]);
-    return true;
-  }
+  if (fs.existsSync(path.join(root, ".git"))) return false;
+  await gitRaw(root, ["init", "-b", "main"]);
+  await gitRaw(root, ["config", "user.name", ident.name]);
+  await gitRaw(root, ["config", "user.email", ident.email]);
+  return true;
 }
 
 export async function gitStatus(sb: Sandbox): Promise<string> {

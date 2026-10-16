@@ -28,3 +28,27 @@ test("git-lite: init, status, commit, log, diff", async () => {
     cleanup();
   }
 });
+
+test("a workspace nested inside another repo gets its own repo, not the parent's", async () => {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const { execFileSync } = await import("node:child_process");
+  const { tempSandbox } = await import("./helpers.ts");
+  const parent = tempSandbox();
+  try {
+    execFileSync("git", ["init", "-b", "main"], { cwd: parent.dir });
+    const nested = path.join(parent.dir, "workspace");
+    fs.mkdirSync(nested);
+    fs.writeFileSync(path.join(nested, "a.txt"), "x\n");
+    assert.equal(await g.ensureRepo(nested, ident), true, "must create its own repo");
+    assert.ok(fs.existsSync(path.join(nested, ".git")));
+    assert.equal(await g.ensureRepo(nested, ident), false);
+    // a nested folder WITHOUT its own .git must be refused by the git tools
+    const bare = path.join(parent.dir, "other");
+    fs.mkdirSync(bare);
+    const { createSandbox } = await import("../src/sandbox.ts");
+    await assert.rejects(g.gitStatus(createSandbox(bare)), /not its own git repository/);
+  } finally {
+    parent.cleanup();
+  }
+});
