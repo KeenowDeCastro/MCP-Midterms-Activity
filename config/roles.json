@@ -1,0 +1,19 @@
+{
+  "_comment": "Which tools each role can see. A role that is not given a tool never even learns it exists. '*' means all tools.",
+  "admin": ["*"],
+  "planner": [
+    "list_files", "read_file", "file_info", "search_code", "repo_map",
+    "write_file", "str_replace", "append_file",
+    "git_status", "git_log"
+  ],
+  "builder": [
+    "list_files", "read_file", "file_info", "search_code", "repo_map",
+    "write_file", "str_replace", "append_file", "delete_file",
+    "git_status", "git_log", "git_diff", "git_commit"
+  ],
+  "reviewer": [
+    "list_files", "read_file", "file_info", "search_code", "repo_map",
+    "append_file",
+    "git_status", "git_log", "git_diff"
+  ]
+}

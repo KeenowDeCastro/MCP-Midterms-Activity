@@ -1,0 +1,35 @@
+{
+  "name": "mcp-file-server",
+  "version": "1.0.0",
+  "description": "A sandboxed MCP file-server connector with git-lite tools and a multi-agent handoff protocol.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "build": "tsc",
+    "start": "node --env-file=.env dist/server.js",
+    "test": "tsx --test test/sandbox.test.ts test/fileOps.test.ts test/gitOps.test.ts test/auth.test.ts",
+    "init:workspace": "tsx --env-file=.env scripts/init-workspace.ts",
+    "smoke": "tsx --env-file=.env scripts/smoke-test.ts",
+    "transcript": "tsx --env-file=.env scripts/export-transcript.ts",
+    "token": "node -e \"console.log(require('crypto').randomBytes(24).toString('hex'))\"",
+    "inspector": "npx @modelcontextprotocol/inspector"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
