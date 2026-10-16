@@ -4,6 +4,22 @@ A sandboxed [Model Context Protocol](https://modelcontextprotocol.io) (MCP) serv
 
 Built for CS 3A/3B Midterms Pt 1 (Week 6: Model Context Protocol).
 
+## How it works
+
+```
+Claude chat (claude.ai)
+      │  HTTPS (custom connector)
+      ▼
+ngrok tunnel   https://<NGROK_DOMAIN>
+      ▼
+Express server (src/server.ts, port 8787, kept alive by pm2)
+      │  1. token in the URL or header is checked (constant-time)
+      │  2. the token selects a role: admin | builder | planner | reviewer
+      │  3. every tool path goes through the sandbox
+      ▼
+workspace/   <- the only folder agents can touch (its own git repo)
+```
+
 ## What it does
 
 | Area | Tools |
@@ -80,7 +96,7 @@ SMOKE_URL=https://<NGROK_DOMAIN>/mcp npm run smoke     # PowerShell: $env:SMOKE_
 
 **MCP Inspector:** `npm run inspector`, then choose *Streamable HTTP* with the URL `http://127.0.0.1:8787/mcp/<token>`. (The Inspector 2.x server form has no header field, so the token goes in the URL. Older versions can use the header `Authorization: Bearer <token>` instead.)
 
-**Claude on the web (tested):** *Customize → Connectors → Add custom connector*. Name `mcp-file-server`, URL `https://<NGROK_DOMAIN>/mcp/<token>`, authentication *No sign in*. Then start a chat, click **+ → Connectors**, and switch the connector on. Add one connector per role to run agents with different permissions.
+**Claude on the web (tested):** *Customize → Connectors → Add custom connector*. Name `mcp-file-server`, URL `https://<NGROK_DOMAIN>/mcp/<token>`, authentication *No sign in*. Then start a chat, click **+ → Connectors**, and switch the connector on.
 
 The token in the URL selects the role. Treat that URL like a password.
 
@@ -122,12 +138,37 @@ Known limitations:
 - A token in the URL path can appear in logs of tools that record URLs. Prefer the `Authorization` header where the client supports it.
 - The error for a blind `write_file` overwrite includes the file's current version, so an agent can retry without reading the file. Git history is the backup.
 - There is no rate limiting.
+- Claude's free plan allows one custom connector, so the reviewer role is demonstrated in MCP Inspector, and the Claude sessions share one connector.
+
+## Demo task
+
+Four agent sessions, each in a new chat, built a cut/fill earthworks volume calculator (`earthworks.py`, average end area method) using only the handoff files to carry context.
+
+| Session | Role | Result |
+|---|---|---|
+| 1 | Planner | Spec, hand-checked test cases, decisions |
+| 2 | Builder | `earthworks.py` and `test_earthworks.py` |
+| 3 | Reviewer | Found a decision note that described tests that did not exist |
+| 4 | Builder | Added the missing tests and fixed a huge-integer overflow |
+
+The agents cannot run code, so I ran the tests myself: `python -m unittest test_earthworks -v` gave 10 tests, OK. Details are in `evidence/` (`transcript.md`, the four handoff files, `workspace-history.txt`) and `docs/REPORT.md`.
+
+## Course requirements
+
+| # | Requirement | Where |
+|---|---|---|
+| 1 | Sandboxed workspace, escapes rejected | `src/sandbox.ts` and `test/sandbox.test.ts` |
+| 2 | At least 8 tools | 13 tools (file, search, git-lite) |
+| 3 | HTTPS through a tunnel, kept alive by a process manager | ngrok and pm2 (`ecosystem.config.cjs`) |
+| 4 | Handoff protocol | `PROJECT_STATE.md`, `PLAN_LOG.md`, `CHECKPOINTS.md`, `DECISIONS.md` in `workspace/` |
+| 5 | Real MCP client, multi-step task across 2+ sessions | Claude on the web, see `evidence/` |
+| 6 | Short report | `docs/REPORT.md` |
 
 ## Evidence
 
 ```bash
 npm run transcript                  # writes evidence/transcript.md from the call log
-SINCE=2026-10-20 npm run transcript # only calls from a given date
+SINCE=2026-10-16 npm run transcript # only calls from a given date
 ```
 
 Copy `workspace/PLAN_LOG.md` and `workspace/CHECKPOINTS.md` into `evidence/` before submitting.
