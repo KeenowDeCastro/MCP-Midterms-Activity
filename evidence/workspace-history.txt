@@ -1,0 +1,8 @@
+4875e39 Close out demo: final PLAN_LOG entry, ignore __pycache__
+a0a91a5 Record human test run (10 tests OK): add CP-5 verified checkpoint, mark project complete in PROJECT_STATE, log session 6; includes leftover CP-4 and PLAN_LOG session 5 text
+8a42591 Apply review fixes (tests not yet run): add bool/None/non-iterable-row/huge-int error tests, make huge ints raise ValueError, rename unused var, update D-5, add D-6, log session 5; includes CP-3 and Reviewer entry
+bc98866 Builder: implement earthworks.py and test_earthworks.py (average end area); tests not yet run. Also commits CP-2 in CHECKPOINTS.md
+524cb38 Planner handoff: earthworks spec, test cases, task list, decisions D-1..D-4
+cb5d71b Add CP-1 checkpoint for Milestone 3 (verified by smoke test through tunnel and real client connection; base commit b79e207)
+b79e207 Handoff: set goal, status Milestone 3 complete, next step protocol test; log session 1
+c4008fe Initialise handoff files

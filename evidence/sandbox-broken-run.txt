@@ -1,0 +1,175 @@
+
+> mcp-file-server@1.0.0 test
+> tsx --test test/sandbox.test.ts test/fileOps.test.ts test/gitOps.test.ts test/auth.test.ts
+
+[32m✔ parses role=token pairs [90m(0.7827ms)[39m[39m
+[32m✔ rejects weak, placeholder, malformed and duplicate tokens [90m(0.4357ms)[39m[39m
+[32m✔ matches a presented token to its role [90m(0.2801ms)[39m[39m
+[32m✔ reads the token from a Bearer header or the URL path [90m(0.2008ms)[39m[39m
+[32m✔ write -> read round trip, with version in the header [90m(13.0294ms)[39m[39m
+[32m✔ read_file pages and reads the tail [90m(8.0199ms)[39m[39m
+[32m✔ write_file refuses to overwrite without the right version [90m(11.8164ms)[39m[39m
+[32m✔ str_replace: exactly one match, literal replacement [90m(11.3192ms)[39m[39m
+[32m✔ str_replace honours if_version [90m(4.6483ms)[39m[39m
+[32m✔ two concurrent edits with the same version: only one wins [90m(6.5797ms)[39m[39m
+[32m✔ append_file adds a newline between entries [90m(5.8504ms)[39m[39m
+[32m✔ delete_file is gated three ways [90m(6.266ms)[39m[39m
+[32m✔ list_files and repo_map skip .git and node_modules [90m(9.1733ms)[39m[39m
+[32m✔ search_code finds lines, supports regex and extension filters [90m(20.2116ms)[39m[39m
+[32m✔ binary files are refused, file_info reports versions [90m(6.3788ms)[39m[39m
+[31m✖ git-lite: init, status, commit, log, diff [90m(416.6842ms)[39m[39m
+[31m✖ rejects path escape: ../secret.txt [90m(3.0747ms)[39m[39m
+[31m✖ rejects path escape: ../../etc/passwd [90m(1.7496ms)[39m[39m
+[31m✖ rejects path escape: notes/../../outside.txt [90m(1.8537ms)[39m[39m
+[31m✖ rejects path escape: a/b/../../../x [90m(1.7537ms)[39m[39m
+[31m✖ rejects path escape: ..\..\windows\system32 [90m(2.0027ms)[39m[39m
+[32m✔ rejects path escape: /etc/passwd [90m(1.3874ms)[39m[39m
+[32m✔ rejects path escape: C:/Windows/win.ini [90m(0.9936ms)[39m[39m
+[32m✔ rejects path escape: //server/share/file [90m(1.05ms)[39m[39m
+[32m✔ accepts normal relative paths and keeps them inside the root [90m(2.8172ms)[39m[39m
+[32m✔ blocks the .git folder and null bytes [90m(1.2305ms)[39m[39m
+[32m✔ root is only allowed when asked for [90m(1.3171ms)[39m[39m
+[31m✖ rejects a symlink that points outside the workspace [90m(4.9672ms)[39m[39m
+[32m✔ rejects a dangling symlink [90m(2.6689ms)[39m[39m
+[34mℹ tests 29[39m
+[34mℹ suites 0[39m
+[34mℹ pass 22[39m
+[34mℹ fail 7[39m
+[34mℹ cancelled 0[39m
+[34mℹ skipped 0[39m
+[34mℹ todo 0[39m
+[34mℹ duration_ms 552.846[39m
+
+[31m✖ failing tests:[39m
+
+test at test\gitOps.test.ts:9:1
+[31m✖ git-lite: init, status, commit, log, diff [90m(416.6842ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /outside the workspace/. Input:
+  
+  "ToolError: git diff failed: fatal: ../outside: '../outside' is outside repository at 'C:/Users/Keeno De Castro/AppData/Local/Temp/mcp-ws-Q2CqFq'"
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (C:\Projects\mcp-file-server\test\gitOps.test.ts:26:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: ToolError: git diff failed: fatal: ../outside: '../outside' is outside repository at 'C:/Users/Keeno De Castro/AppData/Local/Temp/mcp-ws-Q2CqFq'
+        at git (C:\Projects\mcp-file-server\src\gitOps.ts:35:11)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Module.gitDiff (C:\Projects\mcp-file-server\src\gitOps.ts:70:16)
+        at async waitForActual (node:assert:646:5)
+        at async strict.rejects (node:assert:769:25)
+        at async TestContext.<anonymous> (C:\Projects\mcp-file-server\test\gitOps.test.ts:26:5)
+        at async Test.run (node:internal/test_runner/test:1389:7)
+        at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3),
+    expected: /outside the workspace/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:20:3
+[31m✖ rejects path escape: ../secret.txt [90m(3.0747ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception (ToolError).
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { name: 'ToolError' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:20:3
+[31m✖ rejects path escape: ../../etc/passwd [90m(1.7496ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception (ToolError).
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { name: 'ToolError' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:20:3
+[31m✖ rejects path escape: notes/../../outside.txt [90m(1.8537ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception (ToolError).
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { name: 'ToolError' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:20:3
+[31m✖ rejects path escape: a/b/../../../x [90m(1.7537ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception (ToolError).
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { name: 'ToolError' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:20:3
+[31m✖ rejects path escape: ..\..\windows\system32 [90m(2.0027ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception (ToolError).
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { name: 'ToolError' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test\sandbox.test.ts:64:1
+[31m✖ rejects a symlink that points outside the workspace [90m(4.9672ms)[39m[39m
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Projects\mcp-file-server\test\sandbox.test.ts:75:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /symlink/,
+    operator: 'throws',
+    diff: 'simple'
+  }
